@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>大西北 · 青甘大环线 7 日深度游</title>
 <style>
   :root{
@@ -21,7 +21,7 @@
     --grad:linear-gradient(135deg,#635bff 0%,#7c3aed 45%,#06b6d4 100%);
   }
   *{box-sizing:border-box;}
-  html,body{height:100%;margin:0;}
+  html,body{height:100%;height:100dvh;margin:0;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
     color:var(--ink);
@@ -149,13 +149,104 @@
   .marker-hit:hover circle.dot{stroke-width:4;}
   .marker-label{font-size:12px;font-weight:600;fill:#334155;}
 
+  /* ===== 自驾路段信息条 ===== */
+  .day-drive{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:linear-gradient(135deg,rgba(99,91,255,.08),rgba(6,182,212,.08));
+    border:1px solid #dbe4f3;border-radius:14px;padding:11px 14px;margin:0 2px 16px;
+  }
+  .day-drive .dd-icon{font-size:20px;line-height:1;}
+  .day-drive .dd-main{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;}
+  .day-drive .dd-km{font-size:17px;font-weight:800;color:#4f46e5;}
+  .day-drive .dd-km small{font-size:11px;font-weight:700;color:var(--ink-3);margin-left:2px;}
+  .day-drive .dd-h{font-size:13px;font-weight:700;color:var(--ink-2);}
+  .day-drive .dd-road{font-size:12px;color:var(--ink-2);background:rgba(255,255,255,.7);border:1px solid var(--line);padding:2px 9px;border-radius:999px;font-weight:600;}
+  .day-drive .dd-tip{flex:1 1 100%;font-size:12px;color:#b45309;background:rgba(245,158,11,.10);border-radius:8px;padding:6px 10px;line-height:1.5;}
+  .day-drive .dd-tip b{color:#92400e;}
+
+  /* ===== 驾车段连接（POI 之间） ===== */
+  .tl-leg{margin:-4px 0 12px 0;padding-left:2px;}
+  .leg-pill{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;
+    color:#4338ca;background:#eef2ff;border:1px dashed #c7d2fe;border-radius:999px;padding:4px 11px;
+  }
+  .leg-pill .leg-sep{color:#c7d2fe;}
+
+  /* ===== 自驾贴士面板 ===== */
+  .tips{
+    margin:8px 2px 6px;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);
+  }
+  .tips h3{margin:0 0 10px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;}
+  .tips ul{margin:0;padding-left:2px;list-style:none;display:grid;grid-template-columns:1fr;gap:8px;}
+  .tips li{font-size:12.5px;color:var(--ink-2);line-height:1.55;padding-left:24px;position:relative;}
+  .tips li b{color:var(--ink);}
+  .tips li::before{content:attr(data-emo);position:absolute;left:0;top:0;font-size:14px;}
+
+  /* ===== 地图路线范围切换控件 ===== */
+  .map-ctrl{position:absolute;right:16px;top:56px;z-index:6;display:flex;gap:0;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border:1px solid var(--line);
+    border-radius:12px;padding:4px;box-shadow:var(--shadow);}
+  .map-ctrl button{border:none;background:transparent;font-size:12.5px;font-weight:700;color:var(--ink-2);
+    padding:7px 13px;border-radius:9px;cursor:pointer;transition:.16s ease;white-space:nowrap;}
+  .map-ctrl button.active{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(99,91,255,.30);}
+  .map-ctrl button:hover:not(.active){color:var(--ink);}
+  #route-pill{line-height:1.4;max-width:230px;}
+
+  /* ===== 手机 / 窄屏适配（≤980px）：上半屏地图 + 下半屏行程滚动 ===== */
   @media (max-width:980px){
-    body{overflow:auto;}
-    .main{flex-direction:column;}
-    .left{flex:none;max-width:none;width:100%;overflow:visible;}
-    .right{height:62vh;min-height:420px;flex:none;width:100%;}
-    .banner{flex-direction:column;align-items:center;}
-    .legend{margin:6px auto 0;}
+    html{height:auto;}
+    body{overflow:visible;height:auto;min-height:100dvh;}
+
+    /* Banner 竖排居中，徽章 2×2 网格 */
+    .banner{padding:16px 16px 12px;flex-direction:column;align-items:center;gap:12px;}
+    .banner::after{left:16px;right:16px;}
+    .title-block{flex:1 1 auto;min-width:0;}
+    .title{font-size:clamp(24px,7vw,32px);}
+    .subtitle{font-size:12.5px;padding:0 2px;}
+    .badges{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;max-width:320px;}
+    .badge{min-width:0;padding:10px 10px;}
+    .badge .num{font-size:18px;}
+
+    /* Tabs 横向滚动，图例收起 */
+    .tabs{padding:10px 14px 4px;flex-wrap:nowrap;overflow-x:auto;gap:8px;
+      -webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab{flex:0 0 auto;padding:8px 13px;font-size:13px;}
+    .tab .t-sub{font-size:9.5px;}
+    .legend{display:none;}
+
+    /* Main：地图固定上半屏，行程在下半屏独立滚动 */
+    .main{flex-direction:column;display:flex;padding:10px 14px 14px;gap:12px;min-height:0;overflow:visible;}
+    .right{order:-1;position:sticky;top:0;z-index:4;flex:0 0 auto;
+      height:42vh;min-height:260px;width:100%;
+      box-shadow:var(--shadow-lg), 0 8px 20px rgba(15,23,42,.10);}
+    .left{flex:1 1 auto;max-width:none;width:100%;overflow:visible;padding-right:0;min-height:0;
+      -webkit-overflow-scrolling:touch;}
+
+    /* 时间轴在手机上略紧凑 */
+    .tl{padding-left:56px;}
+    .tl-item::before{left:38px;}
+    .tl-time{width:38px;font-size:12px;}
+    .tl-dot{left:31px;width:14px;height:14px;}
+    .tl-card{padding:12px 13px;}
+    .tl-name{font-size:15px;}
+
+    /* 地图浮层：route-pill 左上、map-ctrl 右上分离；隐藏 mode-tag 省空间 */
+    .map-overlay-tl{left:10px;top:10px;}
+    #route-pill{max-width:148px;font-size:11px;padding:6px 9px;line-height:1.35;}
+    .map-overlay-tr{display:none;}
+    .map-ctrl{top:10px;right:10px;padding:3px;}
+    .map-ctrl button{padding:6px 10px;font-size:11.5px;}
+    .key-hint{font-size:11.5px;padding:8px 12px;bottom:12px;}
+  }
+
+  /* 超窄屏（≤560px）进一步紧凑，给行程更多滚动空间 */
+  @media (max-width:560px){
+    .right{flex-basis:34vh;height:34vh;min-height:215px;}
+    .badges{max-width:280px;}
+    .title{font-size:clamp(22px,7.5vw,28px);}
+    .subtitle{font-size:12px;}
   }
 </style>
 </head>
@@ -163,12 +254,13 @@
 
   <header class="banner">
     <div class="title-block">
-      <span class="eyebrow">Qinghai · Gansu Grand Loop</span>
-      <h1 class="title">大西北 · 青甘大环线</h1>
-      <p class="subtitle">7 日深度游 · 历史文化 × 地道美食 × 极致自然 × 烟火夜生活</p>
+      <span class="eyebrow">Qinghai Self-Drive · Family Relaxed</span>
+      <h1 class="title">大西北 · 青甘小环线</h1>
+      <p class="subtitle">🚗 7 日自驾 · 两大一小 · 单人驾驶轻松版 · 历史文化 × 美食 × 自然 × 亲子夜游</p>
     </div>
     <div class="badges">
       <div class="badge"><div class="num" id="b-days">7</div><div class="lbl">行程天数</div></div>
+      <div class="badge"><div class="num" id="b-mileage">0</div><div class="lbl">自驾总里程</div></div>
       <div class="badge"><div class="num" id="b-pois">0</div><div class="lbl">打卡 POI</div></div>
       <div class="badge"><div class="num" id="b-budget">¥0</div><div class="lbl">总预算 / 人</div></div>
     </div>
@@ -183,6 +275,17 @@
         <p id="day-sub">—</p>
       </div>
       <div class="tl" id="timeline"></div>
+      <div class="tips">
+        <h3>🧭 两大一小 · 单人驾驶轻松指南</h3>
+        <ul>
+          <li data-emo="🚙"><b>单人驾驶节奏：</b>全程仅 Day6 一个长途日（大柴旦→敦煌 330km），其余每日 ≤220km；每驾驶 2 小时进服务区/加油站休息，让小学生下车活动 10 分钟，避免疲劳累积。</li>
+          <li data-emo="🧒"><b>小学生友好：</b>茶卡盐湖租鞋套踩水、鸣沙山骑骆驼滑沙、莫高窟可约儿童讲解、青海湖边骑马与油菜花田拍照——每天保留 1 段“玩”的时间，不赶景点。</li>
+          <li data-emo="🏔️"><b>高原与儿童：</b>西宁/青海湖/茶卡海拔 2200–3200m，避免让孩子剧烈跑跳；备巧克力、温水、红景天，出现头痛及时下撤休息。</li>
+          <li data-emo="🎫"><b>票务预约：</b>莫高窟 A 类票（看 8 个实体洞窟）需提前约 30 天在官网预约，儿童多免票/半价；茶卡、翡翠湖建议网购优惠票，省排队。</li>
+          <li data-emo="✈️"><b>收官不绕路：</b>Day7 敦煌飞回（敦煌机场有飞 西宁/兰州/西安/北京等航班），无需原路驾驶返回，省去约 520km 返程驾驶。</li>
+          <li data-emo="🎒"><b>装备清单：</b>高倍防晒、墨镜、保湿唇膏；昼夜温差 15℃+，给孩子备冲锋衣/薄羽绒；盐湖与戈壁反光强，墨镜必备。</li>
+        </ul>
+      </div>
     </section>
 
     <section class="right">
@@ -191,6 +294,10 @@
       </div>
       <div class="map-overlay-tr">
         <div class="mode-tag" id="mode-tag">加载中…</div>
+      </div>
+      <div class="map-ctrl" id="route-ctrl">
+        <button data-scope="day" class="active">当日路线</button>
+        <button data-scope="all">整体线路</button>
       </div>
       <div id="map"></div>
       <div class="key-hint" id="key-hint" style="display:none"></div>
@@ -211,80 +318,67 @@ const CAT = {
 };
 
 const DAYS = [
-  { day:1, city:'西宁', title:'西宁 · 高原古城初体验', sub:'塔尔寺的禅意、莫家街的烟火、夜市的喧嚣',
+  { day:1, city:'西宁', title:'西宁 · 高原古城慢游', sub:'塔尔寺的禅意、莫家街的烟火、夜市的喧嚣',
+    drive:{km:60, h:'约 1.5h', road:'市区 + 湟中近郊', tip:'今日城市游，单人驾驶零压力；塔尔寺往返约 50km 有大型停车场。落地先取车适应高原，节奏放轻松，别赶时间。'},
     pois:[
-      {time:'08:30', name:'塔尔寺', cat:'culture', lat:36.4866, lng:101.5736, cost:70,
-        desc:'藏传佛教格鲁派祖庭，宗喀巴大师诞生地，艺术三绝（壁画/堆绣/酥油花）值得细看。'},
-      {time:'12:00', name:'莫家街', cat:'food', lat:36.6208, lng:101.7832, cost:80,
-        desc:'西宁老牌美食街，酿皮、手抓羊肉、老酸奶、甜醅子一站式吃齐。'},
-      {time:'14:30', name:'东关清真大寺', cat:'culture', lat:36.6170, lng:101.7973, cost:0,
-        desc:'西北四大清真寺之一，伊斯兰建筑宏伟庄严，可感受多民族共生的西宁。'},
-      {time:'16:30', name:'水井巷', cat:'shop', lat:36.6240, lng:101.7830, cost:150,
-        desc:'采购黑枸杞、牦牛肉干、青稞酒等高原特产，伴手礼首选。'},
+      {time:'08:30', name:'塔尔寺', cat:'culture', lat:36.4866, lng:101.5736, cost:70, driveNext:{km:28, min:45},
+        desc:'藏传佛教格鲁派祖庭，宗喀巴大师诞生地；艺术三绝（壁画/堆绣/酥油花）色彩浓烈，小学生也看得津津有味。'},
+      {time:'12:00', name:'莫家街', cat:'food', lat:36.6208, lng:101.7832, cost:80, driveNext:{km:3, min:12},
+        desc:'西宁老牌美食街，酿皮、手抓羊肉、老酸奶、甜醅子一站式吃齐，孩子最爱老酸奶。'},
+      {time:'14:30', name:'东关清真大寺', cat:'culture', lat:36.6170, lng:101.7973, cost:0, driveNext:{km:2, min:8},
+        desc:'西北四大清真寺之一，宏伟庄严，可感受多民族共生的西宁，外观参观即可。'},
+      {time:'16:30', name:'水井巷', cat:'shop', lat:36.6240, lng:101.7830, cost:120, driveNext:{km:2, min:8},
+        desc:'采购黑枸杞、牦牛肉干、青稞酒等高原特产，伴手礼首选，孩子挑点小零食。'},
       {time:'19:30', name:'新千国际广场夜市', cat:'food', lat:36.6135, lng:101.7920, cost:100, night:true,
-        desc:'青藏高原最大夜市，烤串、酿皮、土火锅，烟火气与音乐齐飞。'},
+        desc:'青藏高原最大夜市，烤串、酿皮、土火锅，烟火气与音乐齐飞，散步可达不赶路。'},
     ]},
-  { day:2, city:'青海湖→茶卡', title:'青海湖 · 天空之镜', sub:'从日月山到茶卡盐湖，一路湖光与盐白',
+  { day:2, city:'西宁→青海湖', title:'青海湖 · 高原第一面湖', sub:'日月山的分界、二郎剑的蓝、黑马河的落日',
+    drive:{km:220, h:'约 3h', road:'G109 京藏 / 湟源方向', tip:'海拔渐升至 3200m，单人驾驶别因窗外草原分心；沿途服务区可休息，给孩子补水。今日轻松，午前抵湖边玩。'},
     pois:[
-      {time:'08:00', name:'日月山', cat:'culture', lat:36.4700, lng:101.4800, cost:40,
-        desc:'文成公主进藏分界，唐蕃古道与倒淌河传说，草原垭口风光开阔。'},
-      {time:'11:00', name:'青海湖二郎剑', cat:'spot', lat:36.6880, lng:100.5600, cost:90,
-        desc:'中国最大内陆咸水湖，七月油菜花海环湖，蓝湖金浪对比强烈。'},
-      {time:'16:00', name:'黑马河', cat:'spot', lat:36.6800, lng:99.7800, cost:0,
-        desc:'青海湖畔观日出最佳点，晨雾中的湖光与雪山极美（可次日清晨再来）。'},
-      {time:'19:00', name:'茶卡盐湖', cat:'spot', lat:36.7550, lng:99.0830, cost:60,
-        desc:'“天空之镜”，洁白粉镜倒映天空云影，穿亮色裙装出片率最高。'},
+      {time:'09:00', name:'日月山', cat:'culture', lat:36.4700, lng:101.4800, cost:40, driveNext:{km:55, min:50},
+        desc:'文成公主进藏分界，唐蕃古道与倒淌河传说，草原垭口风光开阔，稍作停留拍照。'},
+      {time:'12:30', name:'青海湖二郎剑', cat:'spot', lat:36.6880, lng:100.5600, cost:90, driveNext:{km:80, min:70},
+        desc:'中国最大内陆咸水湖，七月油菜花海环湖；小学生可湖边玩沙、骑牦牛/马、花田拍照。'},
+      {time:'19:00', name:'黑马河', cat:'spot', lat:36.6800, lng:99.7800, cost:0,
+        desc:'青海湖畔观日落最佳点，当晚住这里，次日清晨可再看一次日出，节奏松弛。'},
     ]},
-  { day:3, city:'大柴旦', title:'大柴旦 · 戈壁秘境', sub:'翡翠湖的绿、U型公路的浪、夜市的安逸',
+  { day:3, city:'青海湖→茶卡', title:'茶卡 · 天空之镜', sub:'从湖蓝到盐白，半天足够慢慢玩',
+    drive:{km:160, h:'约 2.5h', road:'G109 → 茶卡盐湖', tip:'今日最轻松的转场，午前即抵达；给孩子备好鞋套在盐湖踩水，湖面反光强，全员戴墨镜。'},
     pois:[
-      {time:'09:30', name:'大柴旦翡翠湖', cat:'spot', lat:37.8500, lng:95.3900, cost:50,
-        desc:'柴达木盆地中的盐湖群，碧绿如翡翠，人少景野的小众出片秘境。'},
-      {time:'14:00', name:'G315 U型公路', cat:'spot', lat:38.4500, lng:94.8000, cost:0,
-        desc:'网红戈壁“天路”，起伏如海浪，自驾打卡拍照，注意安全停车。'},
-      {time:'18:30', name:'大柴旦夜市', cat:'food', lat:37.8300, lng:95.3700, cost:90, night:true,
-        desc:'戈壁小镇的夜生活，羊肉串配啤酒、炕锅羊排，旅途中最松弛的一餐。'},
+      {time:'09:30', name:'茶卡盐湖', cat:'spot', lat:36.7550, lng:99.0830, cost:60,
+        desc:'“天空之镜”，洁白粉镜倒映天空云影；小学生穿亮色衣踩浅水拍照出片率最高，别追打卡赶时间。'},
     ]},
-  { day:4, city:'敦煌', title:'敦煌 · 沙鸣泉清', sub:'当金山口入河西走廊，鸣沙山与夜市相接',
+  { day:4, city:'茶卡→德令哈', title:'德令哈 · 戈壁绿洲歇脚', sub:'可鲁克湖的候鸟、海子的诗',
+    drive:{km:200, h:'约 2.5h', road:'G315 茶德高速', tip:'平坦高速，单人驾驶轻松；德令哈海拔约 2980m，注意补水。今日作为长途前的“缓冲日”，顺路补给。'},
     pois:[
-      {time:'10:00', name:'当金山口', cat:'spot', lat:38.6000, lng:94.2000, cost:0,
-        desc:'柴达木盆地与河西走廊分界，海拔3648米垭口，地貌骤变的地标。'},
-      {time:'14:00', name:'敦煌古城', cat:'culture', lat:40.0500, lng:94.6000, cost:40,
-        desc:'仿宋沙州城，《敦煌》《天龙八部》等影视取景地，丝路氛围浓厚。'},
-      {time:'18:00', name:'鸣沙山月牙泉', cat:'spot', lat:40.0900, lng:94.6900, cost:110, night:true,
-        desc:'沙漠清泉奇观，傍晚登沙山看落日，夜爬可遇星空与万人合唱。'},
-      {time:'21:00', name:'沙州夜市', cat:'food', lat:40.1400, lng:94.6600, cost:120, night:true,
-        desc:'敦煌最火夜市，驴肉黄面、杏皮水、烤羊排，逛吃到尽兴。'},
+      {time:'14:00', name:'可鲁克湖', cat:'spot', lat:37.3800, lng:97.3800, cost:0, driveNext:{km:8, min:12},
+        desc:'芦苇湿地与候鸟栖息地，湖水清澈、人少安静，小学生可看水鸟、栈道散步。'},
+      {time:'16:00', name:'海子诗歌馆', cat:'culture', lat:37.3730, lng:97.3650, cost:0,
+        desc:'诗人海子“姐姐，今夜我在德令哈”的故乡，文化小歇，馆外绿意适合孩子跑跑。'},
     ]},
-  { day:5, city:'敦煌', title:'敦煌 · 千年石窟', sub:'莫高窟的艺术、党河的夜色、文创的巧思',
+  { day:5, city:'德令哈→大柴旦', title:'大柴旦 · 翡翠盐湖', sub:'戈壁中的一汪碧绿，轻松半天',
+    drive:{km:200, h:'约 2.5h', road:'G315 柳格高速', tip:'戈壁公路平直注意横风；翡翠湖人少景野，给孩子做好防晒，下午抵达即可慢游。'},
     pois:[
-      {time:'09:00', name:'莫高窟', cat:'culture', lat:40.0359, lng:94.8096, cost:238,
-        desc:'世界文化遗产，千年佛教石窟艺术宝库，建议提前预约 A 类票看特窟。'},
-      {time:'14:00', name:'敦煌丝路博物馆', cat:'culture', lat:40.1420, lng:94.6620, cost:30,
-        desc:'系统了解敦煌学与丝绸之路历史脉络，与莫高窟行程互补。'},
-      {time:'17:00', name:'党河风情线', cat:'spot', lat:40.1380, lng:94.6650, cost:0, night:true,
-        desc:'敦煌夜景散步道，灯光喷泉映城河，本地人休闲的惬意去处。'},
-      {time:'19:30', name:'夜市文创集市', cat:'shop', lat:40.1400, lng:94.6600, cost:200, night:true,
-        desc:'淘夜光杯、敦煌纹样文创与藻井丝巾，送礼自用皆宜。'},
+      {time:'14:30', name:'大柴旦翡翠湖', cat:'spot', lat:37.8500, lng:95.3900, cost:50,
+        desc:'柴达木盆地中的盐湖群，碧绿如翡翠，小火车环湖、拍照出片，比茶卡更安静更适合亲子。'},
     ]},
-  { day:6, city:'嘉峪关', title:'嘉峪关 · 天下第一雄关', sub:'关城、悬壁、第一墩，长城西端的史诗',
+  { day:6, city:'大柴旦→敦煌', title:'敦煌 · 唯一长途日', sub:'当金山口入河西走廊，傍晚鸣沙山',
+    drive:{km:330, h:'约 5h', road:'G215 当金山盘山 → 敦煌', tip:'⚠️ 全程唯一长途日：早 8 点出发，当金山口盘山下坡慢行；每 2 小时进服务区，让孩子下车活动 10 分钟。单人驾驶别硬撑，累了就近休整再走。'},
     pois:[
-      {time:'09:00', name:'嘉峪关关城', cat:'culture', lat:39.7740, lng:98.2900, cost:110,
-        desc:'“天下第一雄关”，明长城西端起点，城楼巍峨可登临远眺戈壁。'},
-      {time:'13:00', name:'悬壁长城', cat:'culture', lat:39.7900, lng:98.2300, cost:60,
-        desc:'依山脊而筑，如长城倒挂峭壁，登高可见祁连雪峰。'},
-      {time:'16:00', name:'长城第一墩', cat:'culture', lat:39.7400, lng:98.3200, cost:0,
-        desc:'长城最西端起点，立于讨赖河峡谷之上，气势苍茫。'},
-      {time:'19:30', name:'大唐美食街', cat:'food', lat:39.7700, lng:98.2910, cost:100, night:true,
-        desc:'嘉峪关夜宵地标，搓鱼面、糊锅、烤肉，西北风味收尾。'},
+      {time:'12:00', name:'当金山口', cat:'spot', lat:38.6000, lng:94.2000, cost:0, driveNext:{km:150, min:120},
+        desc:'柴达木与河西走廊分界，海拔 3648m 垭口，地貌骤变；停车拍照、上厕所、给孩子透透气再下山。'},
+      {time:'18:30', name:'鸣沙山月牙泉', cat:'spot', lat:40.0900, lng:94.6900, cost:110, night:true,
+        desc:'沙漠清泉奇观；小学生骑骆驼、滑沙、登沙山看落日，傍晚去最凉快也最出片。'},
     ]},
-  { day:7, city:'张掖', title:'张掖 · 七彩收官', sub:'丹霞如画、大佛静卧、老城余味',
+  { day:7, city:'敦煌', title:'敦煌 · 千年石窟收官', sub:'莫高窟的艺术、党河的夜色、飞回的从容',
+    drive:{km:70, h:'市区', road:'敦煌市区 / 景区专线', tip:'收官日几乎不赶路；莫高窟 A 票需提前约 30 天官网预约（儿童多免票/半价）。傍晚逛夜市后，敦煌机场飞回，无需原路驾驶返程。'},
     pois:[
-      {time:'09:30', name:'张掖七彩丹霞', cat:'spot', lat:38.8980, lng:100.1660, cost:75,
-        desc:'世界地质奇观，彩色丘陵如大地调色盘，日出后色彩最浓烈。'},
-      {time:'14:00', name:'张掖大佛寺', cat:'culture', lat:38.9300, lng:100.4500, cost:40,
-        desc:'西夏国寺，内有亚洲最大室内泥塑卧佛，古建与彩塑俱佳。'},
-      {time:'16:30', name:'鼓楼明清街', cat:'shop', lat:38.9350, lng:100.4520, cost:120,
-        desc:'张掖老城核心，临泽小枣、炒拨拉、卷子鸡等地道风味收尾。'},
+      {time:'09:00', name:'莫高窟', cat:'culture', lat:40.0359, lng:94.8096, cost:238, driveNext:{km:25, min:35},
+        desc:'世界文化遗产，千年佛教石窟艺术宝库；可预约儿童讲解，数字中心看球幕电影，孩子接受度更高。'},
+      {time:'17:30', name:'党河风情线', cat:'spot', lat:40.1380, lng:94.6650, cost:0, night:true, driveNext:{km:2, min:8},
+        desc:'敦煌夜景散步道，灯光喷泉映城河，本地人休闲去处，饭后带孩子散散步。'},
+      {time:'19:30', name:'沙州夜市', cat:'food', lat:40.1400, lng:94.6600, cost:120, night:true,
+        desc:'敦煌最火夜市，驴肉黄面、杏皮水、烤羊排，逛吃到尽兴，为旅程画个轻松句号。'},
     ]},
 ];
 
@@ -293,9 +387,11 @@ const DAYS = [
    ========================================================= */
 const totalPOI = DAYS.reduce((s,d)=>s+d.pois.length,0);
 const totalBudget = DAYS.reduce((s,d)=>s+d.pois.reduce((a,p)=>a+p.cost,0),0);
+const totalKm = DAYS.reduce((s,d)=>s+((d.drive&&d.drive.km)||0),0);
 document.getElementById('b-days').textContent = DAYS.length;
 document.getElementById('b-pois').textContent = totalPOI;
 document.getElementById('b-budget').textContent = '¥' + totalBudget.toLocaleString();
+document.getElementById('b-mileage').innerHTML = totalKm.toLocaleString() + '<small style="font-size:11px;font-weight:700"> km</small>';
 
 /* =========================================================
    3) Tab / 时间轴渲染
@@ -312,7 +408,7 @@ DAYS.forEach((d,i)=>{
   t.className = 'tab';
   t.dataset.idx = i;
   t.innerHTML = 'DAY '+d.day + '<span class="t-sub">'+d.city+'</span>';
-  t.addEventListener('click', ()=> renderDay(i));
+  t.addEventListener('click', ()=>{ routeScope='day'; document.querySelectorAll('#route-ctrl button').forEach(b=>b.classList.toggle('active', b.dataset.scope==='day')); renderDay(i); });
   tabsEl.appendChild(t);
 });
 // legend
@@ -332,6 +428,19 @@ function renderList(d){
   dayTitleEl.textContent = 'DAY '+data.day+' · '+data.title;
   daySubEl.textContent = data.sub;
   let html = '';
+  // 当日自驾路段信息条
+  if(data.drive){
+    html += `
+      <div class="day-drive">
+        <span class="dd-icon">🚗</span>
+        <div class="dd-main">
+          <span class="dd-km">${data.drive.km}<small>km</small></span>
+          <span class="dd-h">🕒 ${data.drive.h}</span>
+          <span class="dd-road">${data.drive.road}</span>
+        </div>
+        <div class="dd-tip"><b>驾驶提示 · </b>${data.drive.tip}</div>
+      </div>`;
+  }
   data.pois.forEach((p,i)=>{
     const c = CAT[p.cat];
     const costHtml = p.cost>0 ? '<span class="tl-cost">¥'+p.cost+'</span>' : '<span class="tl-cost free">免费</span>';
@@ -352,8 +461,17 @@ function renderList(d){
           </div>
         </div>
       </div>`;
+    // POI 之间的驾车段
+    if(p.driveNext && i < data.pois.length-1){
+      html += `
+      <div class="tl-leg">
+        <span class="leg-pill">🚗 驾车 ${p.driveNext.km} km <span class="leg-sep">·</span> 约 ${p.driveNext.min} 分钟</span>
+      </div>`;
+    }
   });
   timelineEl.innerHTML = html;
+  const leftEl = document.querySelector('.left');
+  if(leftEl) leftEl.scrollTop = 0;   // 切天时行程列表回到顶部（手机友好）
   // card click -> fly
   timelineEl.querySelectorAll('.tl-card').forEach(card=>{
     card.addEventListener('click', ()=>{
@@ -377,16 +495,69 @@ function renderDay(d){
   currentDay = d;
   renderTabs(d);
   renderList(d);
-  routePill.innerHTML = '当日路线 <b>'+DAYS[d].pois.length+' 站</b>';
-  if(mapMode==='tencent') renderTencent(d);
-  else renderFallback(d);
+  updateRoutePill();
+  renderMap();
 }
+
+/* 角标：显示当日/整体路线的站点数与起终点 */
+function updateRoutePill(){
+  if(routeScope==='all'){
+    const f = DAYS[0].pois[0];
+    const l = DAYS[DAYS.length-1].pois[DAYS[DAYS.length-1].pois.length-1];
+    routePill.innerHTML = '整体线路 <b>'+totalPOI+' 站</b> · <b>'+DAYS.length+' 天</b>'+
+      '<br><span style="font-size:11px;color:#94a3b8">起 '+f.name+' → 终 '+l.name+'</span>';
+  } else {
+    const d = DAYS[currentDay], dv = d.drive;
+    const p0 = d.pois[0], pN = d.pois[d.pois.length-1];
+    routePill.innerHTML = '当日自驾 <b>'+d.pois.length+' 站</b>' + (dv ? ' · <b>'+dv.km+' km</b>' : '')+
+      '<br><span style="font-size:11px;color:#94a3b8">起 '+p0.name+' → 终 '+pN.name+'</span>';
+  }
+}
+
+/* 按当前范围渲染地图（当日 / 整体） */
+function renderMap(){
+  if(mapMode==='tencent'){
+    routeScope==='all' ? renderTencentAll() : renderTencent(currentDay);
+  } else {
+    routeScope==='all' ? renderFallbackAll() : renderFallback(currentDay);
+  }
+}
+
+/* 切换 当日/整体 范围 */
+function setScope(scope){
+  routeScope = scope;
+  document.querySelectorAll('#route-ctrl button').forEach(b=>b.classList.toggle('active', b.dataset.scope===scope));
+  updateRoutePill();
+  renderMap();
+}
+
+/* 从整体线路点击某点 -> 跳回对应那天并高亮该 POI */
+function focusGlobalPoi(dayIdx, poiIdx){
+  if(dayIdx!==currentDay){
+    currentDay = dayIdx;
+    renderTabs(dayIdx);
+    renderList(dayIdx);
+  }
+  routeScope = 'day';
+  document.querySelectorAll('#route-ctrl button').forEach(b=>b.classList.toggle('active', b.dataset.scope==='day'));
+  updateRoutePill();
+  renderMap();
+  activeFallbackIdx = poiIdx;
+  if(mapMode!=='tencent') renderFallback(dayIdx);
+  highlightCard(poiIdx);
+}
+
+/* 绑定 当日/整体 切换控件 */
+document.querySelectorAll('#route-ctrl button').forEach(b=>{
+  b.addEventListener('click', ()=> setScope(b.dataset.scope));
+});
 
 /* =========================================================
    4) 地图：腾讯 JSAPI GL（带离线 SVG 兜底）
    ========================================================= */
-const TENCENT_MAP_KEY = "YOUR_TENCENT_MAP_KEY"; // ← 在此填入你的腾讯地图 Key（lbs.qq.com 申请），保存后刷新即可加载在线地图
+const TENCENT_MAP_KEY = "YGTBZ-E2TW7-7M3XW-PQKIE-LXUQO-QXBQC"; // ← 在此填入你的腾讯地图 Key（lbs.qq.com 申请），保存后刷新即可加载在线地图
 let mapMode = null;        // 'tencent' | 'fallback'
+let routeScope = 'day';    // 'day' | 'all'  —— 当日路线 / 整体线路
 let tmap=null, tMarker=null, tPoly=null, tInfo=null;
 let activeFallbackIdx = -1;
 
@@ -431,13 +602,15 @@ function renderTencent(d){
   const pois = DAYS[d].pois;
   if(tMarker){ tMarker.setMap(null); tMarker=null; }
   if(tPoly){ tPoly.setMap(null); tPoly=null; }
-  const styles = {}; const geoms = [];
+
+  // ---- 标记点（加大尺寸，手机可见） ----
+  const mStyles = {}; const geoms = [];
   pois.forEach((p,i)=>{
-    const id = 'poi_'+d+'_'+i;
-    styles[id] = { src: pinURI(CAT[p.cat].color, i+1), width:36, height:46, anchor:{x:18,y:46} };
-    geoms.push({ id, position:new TMap.LatLng(p.lat,p.lng), styleId:id, properties:{...p, idx:i} });
+    const id = 'm_'+d+'_'+i;
+    mStyles[id] = { src: pinURI(CAT[p.cat].color, i+1), width:42, height:54, anchor:{x:21,y:54} };
+    geoms.push({ id, position:new TMap.LatLng(p.lat,p.lng), styleId:id, properties:{...p, idx:i, dayIdx:d} });
   });
-  tMarker = new TMap.MultiMarker({ map:tmap, styles, geometries:geoms });
+  tMarker = new TMap.MultiMarker({ map:tmap, styles:mStyles, geometries:geoms });
   tMarker.on('click', (e)=>{
     const g = e.geometry; const p = g.properties;
     highlightCard(p.idx);
@@ -446,12 +619,82 @@ function renderTencent(d){
     tInfo.setContent(infoHTML(p));
     tInfo.open();
   });
+
+  // ---- 连线（仅用确定支持的属性：color + width） ----
+  const paths = pois.map(p=>new TMap.LatLng(p.lat,p.lng));
   tPoly = new TMap.MultiPolyline({
     map:tmap,
-    geometries:[{ id:'route', paths: pois.map(p=>new TMap.LatLng(p.lat,p.lng)) }],
-    styles:{ route:{ color:0x635bff, width:4, lineCap:'round', lineJoin:'round', borderColor:0xffffff, borderWidth:2 } }
+    geometries:[{
+      id: 'rline',
+      paths: paths,
+      styleId: 'rline'
+    }],
+    styles:{
+      rline:{
+        color: '#06B6D4',     // 青色，高对比度
+        width: 7,              // 加粗到 7px（原 4px 太细）
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }
+    }
   });
-  // fit bounds
+
+  // 如果上面 MultiPolyline 没生效，用单段 Polyline 逐段兜底画
+  setTimeout(()=>{
+    try {
+      const bounds = tmap.getBounds();
+      if(bounds && bounds.getNorthEast()){
+        const ne = bounds.getNorthEast(), sw = bounds.getSouthWest();
+        // 有有效边界说明地图正常；不做额外操作
+      }
+    } catch(e){
+      // 地图可能异常
+    }
+  }, 200);
+
+  fitPois(pois);
+}
+
+/* 整体线路：把 7 天全部 POI 按行程顺序连成一条大环线 */
+function renderTencentAll(){
+  const all=[];
+  DAYS.forEach((d,di)=>d.pois.forEach((p,i)=>all.push({...p, dayIdx:di, poiIdx:i})));
+  if(tMarker){ tMarker.setMap(null); tMarker=null; }
+  if(tPoly){ tPoly.setMap(null); tPoly=null; }
+
+  // 标记点（加大）
+  const mStyles={}; const geoms=[]; const path=[];
+  all.forEach((p,gi)=>{
+    const id='ga_'+gi;
+    mStyles[id]={ src:pinURI(CAT[p.cat].color, gi+1), width:42, height:54, anchor:{x:21,y:54} };
+    geoms.push({ id, position:new TMap.LatLng(p.lat,p.lng), styleId:id, properties:{...p, idx:p.poiIdx, dayIdx:p.dayIdx} });
+    path.push(new TMap.LatLng(p.lat,p.lng));
+  });
+
+  // 连线（简化可靠样式）
+  tPoly = new TMap.MultiPolyline({
+    map:tmap,
+    geometries:[{id:'rall', paths:path, styleId:'rall'}],
+    styles:{
+      rall:{
+        color: '#06B6D4',
+        width: 7,
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }
+    }});
+
+  tMarker = new TMap.MultiMarker({ map:tmap, styles:mStyles, geometries:geoms });
+  tMarker.on('click',(e)=>{
+    const g=e.geometry; const p=g.properties;
+    focusGlobalPoi(p.dayIdx, p.idx);
+    tmap.panTo(g.position,{zoom:13,duration:600});
+    tInfo.setPosition(g.position); tInfo.setContent(infoHTML(p)); tInfo.open();
+  });
+  fitPois(all);
+}
+
+function fitPois(pois){
   let minLat=90,maxLat=-90,minLng=180,maxLng=-180;
   pois.forEach(p=>{ minLat=Math.min(minLat,p.lat);maxLat=Math.max(maxLat,p.lat);minLng=Math.min(minLng,p.lng);maxLng=Math.max(maxLng,p.lng); });
   const sw=new TMap.LatLng(minLat,minLng), ne=new TMap.LatLng(maxLat,maxLng);
@@ -481,28 +724,36 @@ function startFallback(){
 }
 
 function renderFallback(d){
-  const pois = DAYS[d].pois;
+  renderFallbackCore(DAYS[d].pois, DAYS[d].pois.length-1, false);
+}
+
+/* 整体线路（离线兜底）：7 天全部 POI 顺序连线 */
+function renderFallbackAll(){
+  const all=[];
+  DAYS.forEach((d,di)=>d.pois.forEach((p,i)=>all.push({...p, dayIdx:di, poiIdx:i})));
+  renderFallbackCore(all, all.length-1, true);
+}
+
+/* 通用离线渲染：pois 顺序连线 + 编号彩点 + 起/终标注 */
+function renderFallbackCore(pois, lastIdx, isGrand){
   const W=920,H=640,pad=80;
   let minLat=90,maxLat=-90,minLng=180,maxLng=-180;
   pois.forEach(p=>{ minLat=Math.min(minLat,p.lat);maxLat=Math.max(maxLat,p.lat);minLng=Math.min(minLng,p.lng);maxLng=Math.max(maxLng,p.lng); });
   const spanLat=Math.max(maxLat-minLat,0.01), spanLng=Math.max(maxLng-minLng,0.01);
-  const proj=(lat,lng)=>({
-    x: pad + (lng-minLng)/spanLng*(W-2*pad),
-    y: H - (pad + (lat-minLat)/spanLat*(H-2*pad))
-  });
-  // polyline points
-  const pts = pois.map(p=>proj(p.lat,p.lng));
-  const polyStr = pts.map(pt=>pt.x.toFixed(1)+','+pt.y.toFixed(1)).join(' ');
+  const proj=(lat,lng)=>({x:pad+(lng-minLng)/spanLng*(W-2*pad), y:H-(pad+(lat-minLat)/spanLat*(H-2*pad))});
+  const pts=pois.map(p=>proj(p.lat,p.lng));
+  const polyStr=pts.map(pt=>pt.x.toFixed(1)+','+pt.y.toFixed(1)).join(' ');
   let circles='';
-  pois.forEach((p,i)=>{
-    const pt=pts[i], c=CAT[p.cat].color;
-    const active = (i===activeFallbackIdx);
-    const r = active?20:15;
-    circles += `<g class="marker-hit" data-idx="${i}">
-      ${active?`<circle cx="${pt.x}" cy="${pt.y}" r="${r+7}" fill="${c}" fill-opacity="0.18"/>`:''}
+  pts.forEach((pt,i)=>{
+    const p=pois[i], c=CAT[p.cat].color;
+    const isActive = (!isGrand && i===activeFallbackIdx) || (isGrand && p.dayIdx===currentDay && p.poiIdx===activeFallbackIdx);
+    const r=isActive?20:15;
+    const tag = lastIdx===0 ? ' 🚩🏁' : (i===0 ? ' 🚩' : (i===lastIdx ? ' 🏁' : ''));
+    circles += `<g class="marker-hit" data-i="${i}">
+      ${isActive?`<circle cx="${pt.x}" cy="${pt.y}" r="${r+7}" fill="${c}" fill-opacity="0.18"/>`:''}
       <circle class="dot" cx="${pt.x}" cy="${pt.y}" r="${r}" fill="${c}" stroke="#fff" stroke-width="3"/>
       <text x="${pt.x}" y="${pt.y+5}" font-size="14" font-weight="700" text-anchor="middle" fill="#fff" font-family="Arial">${i+1}</text>
-      <text class="marker-label" x="${pt.x}" y="${pt.y - r - 8}" text-anchor="middle">${p.name}</text>
+      <text class="marker-label" x="${pt.x}" y="${pt.y - r - 8}" text-anchor="middle">${p.name}${tag}</text>
     </g>`;
   });
   const svg = `<svg class="fallback" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -520,16 +771,21 @@ function renderFallback(d){
       ${Array.from({length:11},(_,i)=>`<line x1="0" y1="${i*H/10}" x2="${W}" y2="${i*H/10}"/>`).join('')}
       ${Array.from({length:15},(_,i)=>`<line x1="${i*W/14}" y1="0" x2="${i*W/14}" y2="${H}"/>`).join('')}
     </g>
-    <polyline points="${polyStr}" fill="none" stroke="url(#route)" stroke-width="9" stroke-opacity="0.18" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>
-    <polyline points="${polyStr}" fill="none" stroke="url(#route)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${polyStr}" fill="none" stroke="url(#route)" stroke-width="11" stroke-opacity="0.16" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>
+    <polyline points="${polyStr}" fill="none" stroke="url(#route)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
     ${circles}
   </svg>`;
   const mapEl = document.getElementById('map');
   mapEl.innerHTML = svg;
   mapEl.querySelectorAll('.marker-hit').forEach(g=>{
     g.addEventListener('click', ()=>{
-      const idx=+g.dataset.idx;
-      activeFallbackIdx=idx; renderFallback(d); highlightCard(idx);
+      const i=+g.dataset.i;
+      const p=pois[i];
+      if(isGrand){
+        focusGlobalPoi(p.dayIdx, p.poiIdx);
+      } else {
+        activeFallbackIdx=i; renderFallbackCore(pois, lastIdx, false); highlightCard(i);
+      }
     });
   });
 }
