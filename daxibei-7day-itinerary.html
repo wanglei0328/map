@@ -144,6 +144,13 @@
     box-shadow:var(--shadow-lg);max-width:90%;text-align:center;line-height:1.5;}
   .key-hint code{background:rgba(255,255,255,.18);padding:1px 6px;border-radius:5px;font-family:ui-monospace,Menlo,monospace;}
 
+  /* 选中 POI 后出现的"查看精确位置"深链按钮 */
+  .poi-link{position:absolute;left:10px;bottom:12px;z-index:7;display:none;
+    background:linear-gradient(135deg,#635bff,#7c3aed);color:#fff;text-decoration:none;
+    font-size:12.5px;font-weight:700;padding:9px 13px;border-radius:12px;box-shadow:var(--shadow-lg);
+    max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .poi-link:active{transform:scale(.97);}
+
   /* SVG fallback */
   .fallback{position:absolute;inset:0;width:100%;height:100%;}
   .marker-hit{cursor:pointer;}
@@ -246,6 +253,7 @@
     .map-ctrl{top:auto;bottom:12px;right:10px;padding:3px;z-index:10;}
     .map-ctrl button{padding:6px 10px;font-size:11.5px;}
     .key-hint{font-size:11.5px;padding:8px 12px;bottom:12px;}
+    .poi-link{max-width:calc(100% - 120px);bottom:12px;left:10px;font-size:11.5px;padding:8px 11px;}
   }
 
   /* 超窄屏（≤560px）进一步紧凑，给行程更多滚动空间 */
@@ -308,6 +316,7 @@
       </div>
       <div id="map"></div>
       <div class="key-hint" id="key-hint" style="display:none"></div>
+      <a id="poi-link" class="poi-link" target="_blank" rel="noopener" style="display:none"></a>
     </section>
   </main>
 
@@ -487,6 +496,7 @@ function renderList(d){
       highlightCard(idx);
       if(mapMode==='tencent') tencentFocus(data.pois[idx]);
       else { activeFallbackIdx = idx; renderFallback(d); }
+      showPoiLink(data.pois[idx]);
     });
   });
 }
@@ -555,6 +565,8 @@ function focusGlobalPoi(dayIdx, poiIdx){
   activeFallbackIdx = poiIdx;
   if(mapMode!=='tencent') renderFallback(dayIdx);
   highlightCard(poiIdx);
+  const dp = DAYS[dayIdx] && DAYS[dayIdx].pois[poiIdx];
+  if(dp) showPoiLink(dp);
 }
 
 /* 绑定 当日/整体 切换控件 */
@@ -588,6 +600,19 @@ function infoHTML(p){
     `<div style="font-size:15px;font-weight:800;margin-bottom:4px">${p.name}</div>`+
     `<div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:6px">${p.desc}</div>`+
     `<div style="font-size:12px;color:#0f172a"><b>时间</b> ${p.time} ｜ <b>预算</b> ${cost}</div></div>`;
+}
+
+/* 选中 POI 后：在真实地图（高德）打开该坐标，确保能看到"具体在哪" */
+function showPoiLink(p){
+  const el = document.getElementById('poi-link');
+  if(!el || !p) return;
+  const ext = 'https://uri.amap.com/marker?position='+p.lng+','+p.lat+
+    '&name='+encodeURIComponent(p.name)+'&src=workbuddy&coordinate=gaode&callnative=0';
+  el.href = ext;
+  el.textContent = '📍 查看「'+p.name+'」精确位置';
+  el.style.display = 'inline-block';
+  const hint = document.getElementById('key-hint');
+  if(hint) hint.style.display = 'none';   // 选中后隐藏离线提示，避免遮挡
 }
 
 function startTencent(){
@@ -624,11 +649,12 @@ function renderTencent(d){
   tMarker.on('click', (e)=>{
     const g = e.geometry; const p = g.properties;
     highlightCard(p.idx);
-    tmap.panTo(g.position, {zoom:13, duration:600});
+    tmap.panTo(g.position, {zoom:15, duration:600});
     tInfo.setMap(tmap);
     tInfo.setPosition(g.position);
     tInfo.setContent(infoHTML(p));
     tInfo.open();
+    showPoiLink(p);
   });
 
   // ---- 连线（GL API 的 color/borderColor 必须为数值类型，字符串会静默失败） ----
@@ -705,9 +731,10 @@ function renderTencentAll(){
   tMarker.on('click',(e)=>{
     const g=e.geometry; const p=g.properties;
     focusGlobalPoi(p.dayIdx, p.idx);
-    tmap.panTo(g.position,{zoom:13,duration:600});
+    tmap.panTo(g.position,{zoom:15,duration:600});
     tInfo.setMap(tmap);
     tInfo.setPosition(g.position); tInfo.setContent(infoHTML(p)); tInfo.open();
+    showPoiLink(p);
   });
   fitPois(all);
 }
@@ -722,11 +749,12 @@ function fitPois(pois){
 
 function tencentFocus(p){
   if(!tmap) return;
-  tmap.panTo(new TMap.LatLng(p.lat,p.lng), {zoom:13, duration:700});
+  tmap.panTo(new TMap.LatLng(p.lat,p.lng), {zoom:15, duration:700});
   tInfo.setMap(tmap);
   tInfo.setPosition(new TMap.LatLng(p.lat,p.lng));
   tInfo.setContent(infoHTML(p));
   tInfo.open();
+  showPoiLink(p);
 }
 
 /* ---- 4b. 离线 SVG 兜底 ---- */
@@ -804,6 +832,7 @@ function renderFallbackCore(pois, lastIdx, isGrand){
         focusGlobalPoi(p.dayIdx, p.poiIdx);
       } else {
         activeFallbackIdx=i; renderFallbackCore(pois, lastIdx, false); highlightCard(i);
+        showPoiLink(p);
       }
     });
   });
