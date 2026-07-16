@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大西北 · 青甘大环线 7 日深度游</title>
+<style>
+  :root{
+    --c-spot:#14b8a6;      /* 景点 */
+    --c-food:#f59e0b;      /* 美食 */
+    --c-culture:#6366f1;   /* 文化 */
+    --c-shop:#ec4899;      /* 购物 */
+    --ink:#0f172a;
+    --ink-2:#475569;
+    --ink-3:#94a3b8;
+    --line:#e9eef5;
+    --card:#ffffff;
+    --radius:16px;
+    --shadow:0 6px 24px rgba(15,23,42,.07), 0 1px 3px rgba(15,23,42,.05);
+    --shadow-lg:0 18px 50px rgba(15,23,42,.10);
+    --grad:linear-gradient(135deg,#635bff 0%,#7c3aed 45%,#06b6d4 100%);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(900px 520px at 8% -8%, rgba(99,91,255,.16), transparent 60%),
+      radial-gradient(820px 520px at 96% 4%, rgba(6,182,212,.16), transparent 58%),
+      radial-gradient(700px 500px at 70% 110%, rgba(236,72,153,.10), transparent 60%),
+      #f6f9fc;
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+
+  /* ===== Banner ===== */
+  .banner{
+    position:relative;
+    padding:30px 32px 18px;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+    flex-wrap:wrap;
+  }
+  .banner::after{
+    content:"";position:absolute;left:32px;right:32px;bottom:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--line) 12%,var(--line) 88%,transparent);
+  }
+  .title-block{text-align:center;flex:1 1 480px;min-width:300px;}
+  .eyebrow{
+    display:inline-block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:#6366f1;font-weight:700;margin-bottom:8px;
+    background:rgba(99,102,241,.10);padding:5px 12px;border-radius:999px;
+  }
+  .title{
+    font-size:clamp(28px,4vw,44px);line-height:1.08;font-weight:800;margin:6px 0 10px;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+    letter-spacing:.5px;
+  }
+  .subtitle{font-size:15px;color:var(--ink-2);margin:0;font-weight:500;}
+
+  .badges{display:flex;gap:12px;flex:0 0 auto;}
+  .badge{
+    background:rgba(255,255,255,.78);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:96px;
+    box-shadow:var(--shadow);text-align:center;
+  }
+  .badge .num{font-size:22px;font-weight:800;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .badge .lbl{font-size:11px;color:var(--ink-3);margin-top:6px;letter-spacing:.05em;}
+
+  /* ===== Tabs ===== */
+  .tabs{
+    display:flex;gap:8px;padding:14px 32px 6px;flex-wrap:wrap;align-items:center;
+  }
+  .tab{
+    border:1px solid var(--line);background:rgba(255,255,255,.7);
+    color:var(--ink-2);font-weight:700;font-size:14px;padding:9px 16px;border-radius:11px;
+    cursor:pointer;transition:.18s ease;white-space:nowrap;
+  }
+  .tab:hover{border-color:#c7d2fe;color:var(--ink);transform:translateY(-1px);}
+  .tab.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(99,91,255,.28);}
+  .tab .t-sub{display:block;font-size:10px;font-weight:600;opacity:.8;margin-top:2px;letter-spacing:.02em;}
+  .legend{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+
+  /* ===== Main ===== */
+  .main{flex:1;display:flex;gap:20px;padding:14px 32px 24px;min-height:0;}
+  .left{
+    flex:0 0 452px;max-width:452px;overflow-y:auto;padding-right:8px;
+    scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;
+  }
+  .left::-webkit-scrollbar{width:8px;}
+  .left::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px;}
+
+  .day-head{margin:4px 2px 16px;}
+  .day-head h2{font-size:19px;margin:0 0 4px;font-weight:800;}
+  .day-head p{margin:0;font-size:13px;color:var(--ink-3);}
+
+  /* timeline item */
+  .tl{position:relative;padding-left:64px;}
+  .tl-item{position:relative;padding-bottom:14px;}
+  .tl-item::before{
+    content:"";position:absolute;left:46px;top:30px;bottom:-2px;width:2px;
+    background:linear-gradient(var(--line),var(--line));
+  }
+  .tl-item:last-child::before{display:none;}
+  .tl-time{
+    position:absolute;left:0;top:14px;width:44px;text-align:right;
+    font-size:12.5px;font-weight:700;color:var(--ink-2);
+  }
+  .tl-dot{
+    position:absolute;left:39px;top:16px;width:16px;height:16px;border-radius:50%;
+    border:3px solid #fff;box-shadow:0 0 0 2px var(--line);
+  }
+  .tl-card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:13px 15px;box-shadow:var(--shadow);cursor:pointer;transition:.16s ease;
+    position:relative;
+  }
+  .tl-card:hover{transform:translateX(3px);box-shadow:var(--shadow-lg);border-color:#c7d2fe;}
+  .tl-card.active{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15),var(--shadow-lg);}
+  .tl-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .chip{font-size:11px;font-weight:700;color:#fff;padding:3px 9px;border-radius:999px;letter-spacing:.03em;}
+  .tl-name{font-size:15.5px;font-weight:800;color:var(--ink);}
+  .tl-night{margin-left:auto;font-size:13px;background:#eef2ff;color:#6366f1;padding:2px 8px;border-radius:999px;font-weight:700;}
+  .tl-desc{font-size:12.8px;color:var(--ink-2);line-height:1.55;margin:2px 0 8px;}
+  .tl-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
+  .tl-cost{font-weight:800;color:#0f172a;}
+  .tl-cost.free{color:#16a34a;}
+  .tl-idx{font-size:11px;color:var(--ink-3);font-weight:700;}
+
+  /* ===== Right / Map ===== */
+  .right{flex:1;min-width:0;position:relative;border-radius:20px;overflow:hidden;
+    box-shadow:var(--shadow-lg);border:1px solid var(--line);background:#eef2f7;}
+  #map{position:absolute;inset:0;width:100%;height:100%;}
+  .map-overlay-tl{position:absolute;left:16px;top:16px;z-index:5;display:flex;gap:8px;flex-wrap:wrap;}
+  .map-pill{background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid var(--line);
+    border-radius:10px;padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--ink);box-shadow:var(--shadow);}
+  .map-pill b{color:#6366f1;}
+  .map-overlay-tr{position:absolute;right:16px;top:16px;z-index:5;}
+  .mode-tag{background:rgba(15,23,42,.82);color:#fff;border-radius:10px;padding:7px 13px;font-size:12px;font-weight:700;box-shadow:var(--shadow);}
+  .key-hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:6;
+    background:rgba(15,23,42,.86);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:12px;
+    box-shadow:var(--shadow-lg);max-width:90%;text-align:center;line-height:1.5;}
+  .key-hint code{background:rgba(255,255,255,.18);padding:1px 6px;border-radius:5px;font-family:ui-monospace,Menlo,monospace;}
+
+  /* SVG fallback */
+  .fallback{position:absolute;inset:0;width:100%;height:100%;}
+  .marker-hit{cursor:pointer;}
+  .marker-hit:hover circle.dot{stroke-width:4;}
+  .marker-label{font-size:12px;font-weight:600;fill:#334155;}
+
+  @media (max-width:980px){
+    body{overflow:auto;}
+    .main{flex-direction:column;}
+    .left{flex:none;max-width:none;width:100%;overflow:visible;}
+    .right{height:62vh;min-height:420px;flex:none;width:100%;}
+    .banner{flex-direction:column;align-items:center;}
+    .legend{margin:6px auto 0;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="banner">
+    <div class="title-block">
+      <span class="eyebrow">Qinghai · Gansu Grand Loop</span>
+      <h1 class="title">大西北 · 青甘大环线</h1>
+      <p class="subtitle">7 日深度游 · 历史文化 × 地道美食 × 极致自然 × 烟火夜生活</p>
+    </div>
+    <div class="badges">
+      <div class="badge"><div class="num" id="b-days">7</div><div class="lbl">行程天数</div></div>
+      <div class="badge"><div class="num" id="b-pois">0</div><div class="lbl">打卡 POI</div></div>
+      <div class="badge"><div class="num" id="b-budget">¥0</div><div class="lbl">总预算 / 人</div></div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main class="main">
+    <section class="left">
+      <div class="day-head">
+        <h2 id="day-title">—</h2>
+        <p id="day-sub">—</p>
+      </div>
+      <div class="tl" id="timeline"></div>
+    </section>
+
+    <section class="right">
+      <div class="map-overlay-tl">
+        <div class="map-pill" id="route-pill">当日路线 <b>—</b></div>
+      </div>
+      <div class="map-overlay-tr">
+        <div class="mode-tag" id="mode-tag">加载中…</div>
+      </div>
+      <div id="map"></div>
+      <div class="key-hint" id="key-hint" style="display:none"></div>
+    </section>
+  </main>
+
+<script>
+/* =========================================================
+   1) 行程数据（单一数据源）
+   cat: spot=景点 / food=美食 / culture=文化 / shop=购物
+   night=true 表示夜生活向
+   ========================================================= */
+const CAT = {
+  spot:   {label:'景点', color:'#14b8a6'},
+  food:   {label:'美食', color:'#f59e0b'},
+  culture:{label:'文化', color:'#6366f1'},
+  shop:   {label:'购物', color:'#ec4899'},
+};
+
+const DAYS = [
+  { day:1, city:'西宁', title:'西宁 · 高原古城初体验', sub:'塔尔寺的禅意、莫家街的烟火、夜市的喧嚣',
+    pois:[
+      {time:'08:30', name:'塔尔寺', cat:'culture', lat:36.4866, lng:101.5736, cost:70,
+        desc:'藏传佛教格鲁派祖庭，宗喀巴大师诞生地，艺术三绝（壁画/堆绣/酥油花）值得细看。'},
+      {time:'12:00', name:'莫家街', cat:'food', lat:36.6208, lng:101.7832, cost:80,
+        desc:'西宁老牌美食街，酿皮、手抓羊肉、老酸奶、甜醅子一站式吃齐。'},
+      {time:'14:30', name:'东关清真大寺', cat:'culture', lat:36.6170, lng:101.7973, cost:0,
+        desc:'西北四大清真寺之一，伊斯兰建筑宏伟庄严，可感受多民族共生的西宁。'},
+      {time:'16:30', name:'水井巷', cat:'shop', lat:36.6240, lng:101.7830, cost:150,
+        desc:'采购黑枸杞、牦牛肉干、青稞酒等高原特产，伴手礼首选。'},
+      {time:'19:30', name:'新千国际广场夜市', cat:'food', lat:36.6135, lng:101.7920, cost:100, night:true,
+        desc:'青藏高原最大夜市，烤串、酿皮、土火锅，烟火气与音乐齐飞。'},
+    ]},
+  { day:2, city:'青海湖→茶卡', title:'青海湖 · 天空之镜', sub:'从日月山到茶卡盐湖，一路湖光与盐白',
+    pois:[
+      {time:'08:00', name:'日月山', cat:'culture', lat:36.4700, lng:101.4800, cost:40,
+        desc:'文成公主进藏分界，唐蕃古道与倒淌河传说，草原垭口风光开阔。'},
+      {time:'11:00', name:'青海湖二郎剑', cat:'spot', lat:36.6880, lng:100.5600, cost:90,
+        desc:'中国最大内陆咸水湖，七月油菜花海环湖，蓝湖金浪对比强烈。'},
+      {time:'16:00', name:'黑马河', cat:'spot', lat:36.6800, lng:99.7800, cost:0,
+        desc:'青海湖畔观日出最佳点，晨雾中的湖光与雪山极美（可次日清晨再来）。'},
+      {time:'19:00', name:'茶卡盐湖', cat:'spot', lat:36.7550, lng:99.0830, cost:60,
+        desc:'“天空之镜”，洁白粉镜倒映天空云影，穿亮色裙装出片率最高。'},
+    ]},
+  { day:3, city:'大柴旦', title:'大柴旦 · 戈壁秘境', sub:'翡翠湖的绿、U型公路的浪、夜市的安逸',
+    pois:[
+      {time:'09:30', name:'大柴旦翡翠湖', cat:'spot', lat:37.8500, lng:95.3900, cost:50,
+        desc:'柴达木盆地中的盐湖群，碧绿如翡翠，人少景野的小众出片秘境。'},
+      {time:'14:00', name:'G315 U型公路', cat:'spot', lat:38.4500, lng:94.8000, cost:0,
+        desc:'网红戈壁“天路”，起伏如海浪，自驾打卡拍照，注意安全停车。'},
+      {time:'18:30', name:'大柴旦夜市', cat:'food', lat:37.8300, lng:95.3700, cost:90, night:true,
+        desc:'戈壁小镇的夜生活，羊肉串配啤酒、炕锅羊排，旅途中最松弛的一餐。'},
+    ]},
+  { day:4, city:'敦煌', title:'敦煌 · 沙鸣泉清', sub:'当金山口入河西走廊，鸣沙山与夜市相接',
+    pois:[
+      {time:'10:00', name:'当金山口', cat:'spot', lat:38.6000, lng:94.2000, cost:0,
+        desc:'柴达木盆地与河西走廊分界，海拔3648米垭口，地貌骤变的地标。'},
+      {time:'14:00', name:'敦煌古城', cat:'culture', lat:40.0500, lng:94.6000, cost:40,
+        desc:'仿宋沙州城，《敦煌》《天龙八部》等影视取景地，丝路氛围浓厚。'},
+      {time:'18:00', name:'鸣沙山月牙泉', cat:'spot', lat:40.0900, lng:94.6900, cost:110, night:true,
+        desc:'沙漠清泉奇观，傍晚登沙山看落日，夜爬可遇星空与万人合唱。'},
+      {time:'21:00', name:'沙州夜市', cat:'food', lat:40.1400, lng:94.6600, cost:120, night:true,
+        desc:'敦煌最火夜市，驴肉黄面、杏皮水、烤羊排，逛吃到尽兴。'},
+    ]},
+  { day:5, city:'敦煌', title:'敦煌 · 千年石窟', sub:'莫高窟的艺术、党河的夜色、文创的巧思',
+    pois:[
+      {time:'09:00', name:'莫高窟', cat:'culture', lat:40.0359, lng:94.8096, cost:238,
+        desc:'世界文化遗产，千年佛教石窟艺术宝库，建议提前预约 A 类票看特窟。'},
+      {time:'14:00', name:'敦煌丝路博物馆', cat:'culture', lat:40.1420, lng:94.6620, cost:30,
+        desc:'系统了解敦煌学与丝绸之路历史脉络，与莫高窟行程互补。'},
+      {time:'17:00', name:'党河风情线', cat:'spot', lat:40.1380, lng:94.6650, cost:0, night:true,
+        desc:'敦煌夜景散步道，灯光喷泉映城河，本地人休闲的惬意去处。'},
+      {time:'19:30', name:'夜市文创集市', cat:'shop', lat:40.1400, lng:94.6600, cost:200, night:true,
+        desc:'淘夜光杯、敦煌纹样文创与藻井丝巾，送礼自用皆宜。'},
+    ]},
+  { day:6, city:'嘉峪关', title:'嘉峪关 · 天下第一雄关', sub:'关城、悬壁、第一墩，长城西端的史诗',
+    pois:[
+      {time:'09:00', name:'嘉峪关关城', cat:'culture', lat:39.7740, lng:98.2900, cost:110,
+        desc:'“天下第一雄关”，明长城西端起点，城楼巍峨可登临远眺戈壁。'},
+      {time:'13:00', name:'悬壁长城', cat:'culture', lat:39.7900, lng:98.2300, cost:60,
+        desc:'依山脊而筑，如长城倒挂峭壁，登高可见祁连雪峰。'},
+      {time:'16:00', name:'长城第一墩', cat:'culture', lat:39.7400, lng:98.3200, cost:0,
+        desc:'长城最西端起点，立于讨赖河峡谷之上，气势苍茫。'},
+      {time:'19:30', name:'大唐美食街', cat:'food', lat:39.7700, lng:98.2910, cost:100, night:true,
+        desc:'嘉峪关夜宵地标，搓鱼面、糊锅、烤肉，西北风味收尾。'},
+    ]},
+  { day:7, city:'张掖', title:'张掖 · 七彩收官', sub:'丹霞如画、大佛静卧、老城余味',
+    pois:[
+      {time:'09:30', name:'张掖七彩丹霞', cat:'spot', lat:38.8980, lng:100.1660, cost:75,
+        desc:'世界地质奇观，彩色丘陵如大地调色盘，日出后色彩最浓烈。'},
+      {time:'14:00', name:'张掖大佛寺', cat:'culture', lat:38.9300, lng:100.4500, cost:40,
+        desc:'西夏国寺，内有亚洲最大室内泥塑卧佛，古建与彩塑俱佳。'},
+      {time:'16:30', name:'鼓楼明清街', cat:'shop', lat:38.9350, lng:100.4520, cost:120,
+        desc:'张掖老城核心，临泽小枣、炒拨拉、卷子鸡等地道风味收尾。'},
+    ]},
+];
+
+/* =========================================================
+   2) 顶部徽章统计
+   ========================================================= */
+const totalPOI = DAYS.reduce((s,d)=>s+d.pois.length,0);
+const totalBudget = DAYS.reduce((s,d)=>s+d.pois.reduce((a,p)=>a+p.cost,0),0);
+document.getElementById('b-days').textContent = DAYS.length;
+document.getElementById('b-pois').textContent = totalPOI;
+document.getElementById('b-budget').textContent = '¥' + totalBudget.toLocaleString();
+
+/* =========================================================
+   3) Tab / 时间轴渲染
+   ========================================================= */
+const tabsEl = document.getElementById('tabs');
+const timelineEl = document.getElementById('timeline');
+const dayTitleEl = document.getElementById('day-title');
+const daySubEl = document.getElementById('day-sub');
+const routePill = document.getElementById('route-pill');
+let currentDay = 0;
+
+DAYS.forEach((d,i)=>{
+  const t = document.createElement('button');
+  t.className = 'tab';
+  t.dataset.idx = i;
+  t.innerHTML = 'DAY '+d.day + '<span class="t-sub">'+d.city+'</span>';
+  t.addEventListener('click', ()=> renderDay(i));
+  tabsEl.appendChild(t);
+});
+// legend
+const legend = document.createElement('div');
+legend.className = 'legend';
+legend.innerHTML = Object.values(CAT).map(c=>`<span><i style="background:${c.color}"></i>${c.label}</span>`).join('');
+tabsEl.appendChild(legend);
+
+function renderTabs(active){
+  [...tabsEl.querySelectorAll('.tab')].forEach(t=>{
+    t.classList.toggle('active', +t.dataset.idx === active);
+  });
+}
+
+function renderList(d){
+  const data = DAYS[d];
+  dayTitleEl.textContent = 'DAY '+data.day+' · '+data.title;
+  daySubEl.textContent = data.sub;
+  let html = '';
+  data.pois.forEach((p,i)=>{
+    const c = CAT[p.cat];
+    const costHtml = p.cost>0 ? '<span class="tl-cost">¥'+p.cost+'</span>' : '<span class="tl-cost free">免费</span>';
+    html += `
+      <div class="tl-item">
+        <div class="tl-time">${p.time}</div>
+        <div class="tl-dot" style="background:${c.color}"></div>
+        <div class="tl-card" data-idx="${i}">
+          <div class="tl-top">
+            <span class="chip" style="background:${c.color}">${c.label}</span>
+            <span class="tl-name">${p.name}</span>
+            ${p.night?'<span class="tl-night">🌙 夜</span>':''}
+          </div>
+          <div class="tl-desc">${p.desc}</div>
+          <div class="tl-meta">
+            <span class="tl-idx">#${i+1} · ${data.city}</span>
+            ${costHtml}
+          </div>
+        </div>
+      </div>`;
+  });
+  timelineEl.innerHTML = html;
+  // card click -> fly
+  timelineEl.querySelectorAll('.tl-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const idx = +card.dataset.idx;
+      highlightCard(idx);
+      if(mapMode==='tencent') tencentFocus(data.pois[idx]);
+      else { activeFallbackIdx = idx; renderFallback(d); }
+    });
+  });
+}
+
+function highlightCard(idx){
+  timelineEl.querySelectorAll('.tl-card').forEach(c=>{
+    c.classList.toggle('active', +c.dataset.idx === idx);
+  });
+  const el = timelineEl.querySelector('.tl-card[data-idx="'+idx+'"]');
+  if(el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function renderDay(d){
+  currentDay = d;
+  renderTabs(d);
+  renderList(d);
+  routePill.innerHTML = '当日路线 <b>'+DAYS[d].pois.length+' 站</b>';
+  if(mapMode==='tencent') renderTencent(d);
+  else renderFallback(d);
+}
+
+/* =========================================================
+   4) 地图：腾讯 JSAPI GL（带离线 SVG 兜底）
+   ========================================================= */
+const TENCENT_MAP_KEY = "YOUR_TENCENT_MAP_KEY"; // ← 在此填入你的腾讯地图 Key（lbs.qq.com 申请），保存后刷新即可加载在线地图
+let mapMode = null;        // 'tencent' | 'fallback'
+let tmap=null, tMarker=null, tPoly=null, tInfo=null;
+let activeFallbackIdx = -1;
+
+/* ---- 4a. 腾讯地图 ---- */
+function pinURI(color, num){
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='36' height='46' viewBox='0 0 36 46'>`+
+    `<path d='M18 1C9 1 2 8 2 17c0 11 16 28 16 28s16-17 16-28C34 8 27 1 18 1z' fill='${color}'/>`+
+    `<circle cx='18' cy='17' r='14' fill='#ffffff' fill-opacity='0.18'/>`+
+    `<text x='18' y='22' font-size='15' font-family='Arial' font-weight='700' text-anchor='middle' fill='#ffffff'>${num}</text></svg>`;
+  return 'data:image/svg+xml,'+encodeURIComponent(svg);
+}
+
+function infoHTML(p){
+  const c = CAT[p.cat];
+  const cost = p.cost>0 ? '¥'+p.cost : '免费';
+  return `<div style="font-family:-apple-system,'PingFang SC',sans-serif;min-width:200px">`+
+    `<div style="font-size:12px;font-weight:700;color:${c.color};margin-bottom:2px">${c.label}${p.night?' · 🌙夜':''}</div>`+
+    `<div style="font-size:15px;font-weight:800;margin-bottom:4px">${p.name}</div>`+
+    `<div style="font-size:12px;color:#475569;line-height:1.5;margin-bottom:6px">${p.desc}</div>`+
+    `<div style="font-size:12px;color:#0f172a"><b>时间</b> ${p.time} ｜ <b>预算</b> ${cost}</div></div>`;
+}
+
+function startTencent(){
+  tmap = new TMap.Map('map', {
+    center: new TMap.LatLng(DAYS[0].pois[0].lat, DAYS[0].pois[0].lng),
+    zoom: 6, pitch:0
+  });
+  tInfo = new TMap.InfoWindow({ map: tmap, position: new TMap.LatLng(DAYS[0].pois[0].lat, DAYS[0].pois[0].lng), content:'' });
+  mapMode = 'tencent';
+  document.getElementById('mode-tag').textContent = '腾讯地图';
+  document.getElementById('key-hint').style.display = 'none';
+  // 鉴权失败兜底检测
+  setTimeout(()=>{
+    const el = document.getElementById('map');
+    const txt = (el.innerText||'') + (el.textContent||'');
+    if(/key|鉴权|LBS|无效|错误|error/i.test(txt)) startFallback();
+  }, 1600);
+  renderDay(currentDay);
+}
+
+function renderTencent(d){
+  const pois = DAYS[d].pois;
+  if(tMarker){ tMarker.setMap(null); tMarker=null; }
+  if(tPoly){ tPoly.setMap(null); tPoly=null; }
+  const styles = {}; const geoms = [];
+  pois.forEach((p,i)=>{
+    const id = 'poi_'+d+'_'+i;
+    styles[id] = { src: pinURI(CAT[p.cat].color, i+1), width:36, height:46, anchor:{x:18,y:46} };
+    geoms.push({ id, position:new TMap.LatLng(p.lat,p.lng), styleId:id, properties:{...p, idx:i} });
+  });
+  tMarker = new TMap.MultiMarker({ map:tmap, styles, geometries:geoms });
+  tMarker.on('click', (e)=>{
+    const g = e.geometry; const p = g.properties;
+    highlightCard(p.idx);
+    tmap.panTo(g.position, {zoom:13, duration:600});
+    tInfo.setPosition(g.position);
+    tInfo.setContent(infoHTML(p));
+    tInfo.open();
+  });
+  tPoly = new TMap.MultiPolyline({
+    map:tmap,
+    geometries:[{ id:'route', paths: pois.map(p=>new TMap.LatLng(p.lat,p.lng)) }],
+    styles:{ route:{ color:0x635bff, width:4, lineCap:'round', lineJoin:'round', borderColor:0xffffff, borderWidth:2 } }
+  });
+  // fit bounds
+  let minLat=90,maxLat=-90,minLng=180,maxLng=-180;
+  pois.forEach(p=>{ minLat=Math.min(minLat,p.lat);maxLat=Math.max(maxLat,p.lat);minLng=Math.min(minLng,p.lng);maxLng=Math.max(maxLng,p.lng); });
+  const sw=new TMap.LatLng(minLat,minLng), ne=new TMap.LatLng(maxLat,maxLng);
+  if(tmap.fitBounds){ tmap.fitBounds(new TMap.LatLngBounds(sw,ne), {padding:90}); }
+  else { tmap.panTo(new TMap.LatLng((minLat+maxLat)/2,(minLng+maxLng)/2)); tmap.setZoom(7); }
+}
+
+function tencentFocus(p){
+  if(!tmap) return;
+  tmap.panTo(new TMap.LatLng(p.lat,p.lng), {zoom:13, duration:700});
+  tInfo.setPosition(new TMap.LatLng(p.lat,p.lng));
+  tInfo.setContent(infoHTML(p));
+  tInfo.open();
+}
+
+/* ---- 4b. 离线 SVG 兜底 ---- */
+function startFallback(){
+  if(mapMode==='fallback'){ renderDay(currentDay); return; }
+  if(tmap){ try{ tmap.destroy && tmap.destroy(); }catch(e){} }
+  mapMode='fallback';
+  document.getElementById('map').innerHTML='';
+  document.getElementById('mode-tag').textContent='离线示意图';
+  const hint = document.getElementById('key-hint');
+  hint.style.display='block';
+  hint.innerHTML = '当前为离线示意图（无需联网）。如要加载<b>腾讯地图</b>在线底图，请在文件顶部 <code>TENCENT_MAP_KEY</code> 填入你的 Key 后刷新。';
+  renderDay(currentDay);
+}
+
+function renderFallback(d){
+  const pois = DAYS[d].pois;
+  const W=920,H=640,pad=80;
+  let minLat=90,maxLat=-90,minLng=180,maxLng=-180;
+  pois.forEach(p=>{ minLat=Math.min(minLat,p.lat);maxLat=Math.max(maxLat,p.lat);minLng=Math.min(minLng,p.lng);maxLng=Math.max(maxLng,p.lng); });
+  const spanLat=Math.max(maxLat-minLat,0.01), spanLng=Math.max(maxLng-minLng,0.01);
+  const proj=(lat,lng)=>({
+    x: pad + (lng-minLng)/spanLng*(W-2*pad),
+    y: H - (pad + (lat-minLat)/spanLat*(H-2*pad))
+  });
+  // polyline points
+  const pts = pois.map(p=>proj(p.lat,p.lng));
+  const polyStr = pts.map(pt=>pt.x.toFixed(1)+','+pt.y.toFixed(1)).join(' ');
+  let circles='';
+  pois.forEach((p,i)=>{
+    const pt=pts[i], c=CAT[p.cat].color;
+    const active = (i===activeFallbackIdx);
+    const r = active?20:15;
+    circles += `<g class="marker-hit" data-idx="${i}">
+      ${active?`<circle cx="${pt.x}" cy="${pt.y}" r="${r+7}" fill="${c}" fill-opacity="0.18"/>`:''}
+      <circle class="dot" cx="${pt.x}" cy="${pt.y}" r="${r}" fill="${c}" stroke="#fff" stroke-width="3"/>
+      <text x="${pt.x}" y="${pt.y+5}" font-size="14" font-weight="700" text-anchor="middle" fill="#fff" font-family="Arial">${i+1}</text>
+      <text class="marker-label" x="${pt.x}" y="${pt.y - r - 8}" text-anchor="middle">${p.name}</text>
+    </g>`;
+  });
+  const svg = `<svg class="fallback" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#eef4ff"/><stop offset="1" stop-color="#e7fbf6"/>
+      </linearGradient>
+      <linearGradient id="route" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#635bff"/><stop offset="1" stop-color="#06b6d4"/>
+      </linearGradient>
+      <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <rect width="${W}" height="${H}" fill="url(#bg)"/>
+    <g opacity="0.5" stroke="#cdd9ea" stroke-width="1">
+      ${Array.from({length:11},(_,i)=>`<line x1="0" y1="${i*H/10}" x2="${W}" y2="${i*H/10}"/>`).join('')}
+      ${Array.from({length:15},(_,i)=>`<line x1="${i*W/14}" y1="0" x2="${i*W/14}" y2="${H}"/>`).join('')}
+    </g>
+    <polyline points="${polyStr}" fill="none" stroke="url(#route)" stroke-width="9" stroke-opacity="0.18" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>
+    <polyline points="${polyStr}" fill="none" stroke="url(#route)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${circles}
+  </svg>`;
+  const mapEl = document.getElementById('map');
+  mapEl.innerHTML = svg;
+  mapEl.querySelectorAll('.marker-hit').forEach(g=>{
+    g.addEventListener('click', ()=>{
+      const idx=+g.dataset.idx;
+      activeFallbackIdx=idx; renderFallback(d); highlightCard(idx);
+    });
+  });
+}
+
+/* =========================================================
+   5) 启动
+   ========================================================= */
+function boot(){
+  if(!TENCENT_MAP_KEY || TENCENT_MAP_KEY.indexOf('YOUR_')===0){
+    startFallback();
+    return;
+  }
+  const s=document.createElement('script');
+  s.src='https://map.qq.com/api/gljs?v=1&key='+encodeURIComponent(TENCENT_MAP_KEY);
+  s.onload=()=>{ (typeof TMap!=='undefined') ? startTencent() : startFallback(); };
+  s.onerror=()=>{ startFallback(); };
+  document.head.appendChild(s);
+}
+boot();
+</script>
+</body>
+</html>
