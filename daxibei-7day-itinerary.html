@@ -127,6 +127,7 @@
   .tl-cost{font-weight:800;color:#0f172a;}
   .tl-cost.free{color:#16a34a;}
   .tl-idx{font-size:11px;color:var(--ink-3);font-weight:700;}
+  .tl-time-in{display:none;} /* 桌面端隐藏，手机端显示 */
 
   /* ===== Right / Map ===== */
   .right{flex:1;min-width:0;position:relative;border-radius:20px;overflow:hidden;
@@ -224,13 +225,19 @@
     .left{flex:1 1 auto;max-width:none;width:100%;overflow:visible;padding-right:0;min-height:0;
       -webkit-overflow-scrolling:touch;}
 
-    /* 时间轴在手机上略紧凑 */
-    .tl{padding-left:56px;}
-    .tl-item::before{left:38px;}
-    .tl-time{width:38px;font-size:12px;}
-    .tl-dot{left:31px;width:14px;height:14px;}
+    /* 时间轴手机优化：去掉左侧留白，时间整合进卡片内部 */
+    .tl{padding-left:0;}
+    .tl-item::before{display:none;}
+    .tl-time{display:none;}
+    .tl-dot{display:none;}
     .tl-card{padding:12px 13px;}
     .tl-name{font-size:15px;}
+    /* 内联时间标签：手机端显示在卡片右上角 */
+    .tl-time-in{
+      display:inline-flex;align-items:center;gap:3px;
+      font-size:11px;font-weight:700;color:var(--ink-3);background:var(--line);
+      padding:2px 8px;border-radius:999px;margin-left:auto;
+    }
 
     /* 地图浮层：route-pill 左上、map-ctrl 右上分离；隐藏 mode-tag 省空间 */
     .map-overlay-tl{left:10px;top:10px;}
@@ -453,6 +460,7 @@ function renderList(d){
             <span class="chip" style="background:${c.color}">${c.label}</span>
             <span class="tl-name">${p.name}</span>
             ${p.night?'<span class="tl-night">🌙 夜</span>':''}
+            <span class="tl-time-in">🕐 ${p.time}</span>
           </div>
           <div class="tl-desc">${p.desc}</div>
           <div class="tl-meta">
