@@ -585,7 +585,7 @@ function startTencent(){
     center: new TMap.LatLng(DAYS[0].pois[0].lat, DAYS[0].pois[0].lng),
     zoom: 6, pitch:0
   });
-  tInfo = new TMap.InfoWindow({ map: tmap, position: new TMap.LatLng(DAYS[0].pois[0].lat, DAYS[0].pois[0].lng), content:'' });
+  tInfo = new TMap.InfoWindow({ content:'', offset:{x:0,y:-50} });  // 不传 map 参数，避免加载时弹出空白框
   mapMode = 'tencent';
   document.getElementById('mode-tag').textContent = '腾讯地图';
   document.getElementById('key-hint').style.display = 'none';
