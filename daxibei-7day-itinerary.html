@@ -509,8 +509,10 @@ function updateRoutePill(){
   } else {
     const d = DAYS[currentDay], dv = d.drive;
     const p0 = d.pois[0], pN = d.pois[d.pois.length-1];
-    routePill.innerHTML = '当日自驾 <b>'+d.pois.length+' 站</b>' + (dv ? ' · <b>'+dv.km+' km</b>' : '')+
-      '<br><span style="font-size:11px;color:#94a3b8">起 '+p0.name+' → 终 '+pN.name+'</span>';
+    const note = d.pois.length < 2
+      ? '<br><span style="font-size:11px;color:#94a3b8">当日仅 1 个景点，无驾车路段连线</span>'
+      : '<br><span style="font-size:11px;color:#94a3b8">起 '+p0.name+' → 终 '+pN.name+'</span>';
+    routePill.innerHTML = '当日自驾 <b>'+d.pois.length+' 站</b>' + (dv ? ' · <b>'+dv.km+' km</b>' : '') + note;
   }
 }
 
@@ -615,29 +617,34 @@ function renderTencent(d){
     const g = e.geometry; const p = g.properties;
     highlightCard(p.idx);
     tmap.panTo(g.position, {zoom:13, duration:600});
+    tInfo.setMap(tmap);
     tInfo.setPosition(g.position);
     tInfo.setContent(infoHTML(p));
     tInfo.open();
   });
 
-  // ---- 连线（仅用确定支持的属性：color + width） ----
+  // ---- 连线（GL API 的 color/borderColor 必须为数值类型，字符串会静默失败） ----
   const paths = pois.map(p=>new TMap.LatLng(p.lat,p.lng));
-  tPoly = new TMap.MultiPolyline({
-    map:tmap,
-    geometries:[{
-      id: 'rline',
-      paths: paths,
-      styleId: 'rline'
-    }],
-    styles:{
-      rline:{
-        color: '#06B6D4',     // 青色，高对比度
-        width: 7,              // 加粗到 7px（原 4px 太细）
-        borderWidth: 2,
-        borderColor: '#ffffff'
+  if(paths.length >= 2){
+    tPoly = new TMap.MultiPolyline({
+      map:tmap,
+      geometries:[{
+        id: 'rline',
+        paths: paths,
+        styleId: 'rline'
+      }],
+      styles:{
+        rline:{
+          color: 0x06B6D4,     // 青色，高对比度（数值色）
+          width: 7,             // 加粗到 7px
+          borderWidth: 2,
+          borderColor: 0xffffff,
+          lineCap: 'round',
+          lineJoin: 'round'
+        }
       }
-    }
-  });
+    });
+  }
 
   // 如果上面 MultiPolyline 没生效，用单段 Polyline 逐段兜底画
   setTimeout(()=>{
@@ -671,16 +678,18 @@ function renderTencentAll(){
     path.push(new TMap.LatLng(p.lat,p.lng));
   });
 
-  // 连线（简化可靠样式）
+  // 连线（简化可靠样式，color/borderColor 用数值类型）
   tPoly = new TMap.MultiPolyline({
     map:tmap,
     geometries:[{id:'rall', paths:path, styleId:'rall'}],
     styles:{
       rall:{
-        color: '#06B6D4',
+        color: 0x06B6D4,
         width: 7,
         borderWidth: 2,
-        borderColor: '#ffffff'
+        borderColor: 0xffffff,
+        lineCap: 'round',
+        lineJoin: 'round'
       }
     }});
 
@@ -689,6 +698,7 @@ function renderTencentAll(){
     const g=e.geometry; const p=g.properties;
     focusGlobalPoi(p.dayIdx, p.idx);
     tmap.panTo(g.position,{zoom:13,duration:600});
+    tInfo.setMap(tmap);
     tInfo.setPosition(g.position); tInfo.setContent(infoHTML(p)); tInfo.open();
   });
   fitPois(all);
@@ -705,6 +715,7 @@ function fitPois(pois){
 function tencentFocus(p){
   if(!tmap) return;
   tmap.panTo(new TMap.LatLng(p.lat,p.lng), {zoom:13, duration:700});
+  tInfo.setMap(tmap);
   tInfo.setPosition(new TMap.LatLng(p.lat,p.lng));
   tInfo.setContent(infoHTML(p));
   tInfo.open();
