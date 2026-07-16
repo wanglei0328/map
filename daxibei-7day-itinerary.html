@@ -145,7 +145,7 @@
   .key-hint code{background:rgba(255,255,255,.18);padding:1px 6px;border-radius:5px;font-family:ui-monospace,Menlo,monospace;}
 
   /* 选中 POI 后出现的"查看精确位置"深链按钮 */
-  .poi-link{position:absolute;left:10px;bottom:12px;z-index:7;display:none;
+  .poi-link{position:absolute;left:10px;bottom:14px;z-index:999;display:none;pointer-events:auto;
     background:linear-gradient(135deg,#635bff,#7c3aed);color:#fff;text-decoration:none;
     font-size:12.5px;font-weight:700;padding:9px 13px;border-radius:12px;box-shadow:var(--shadow-lg);
     max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -618,7 +618,7 @@ function showPoiLink(p){
 function startTencent(){
   tmap = new TMap.Map('map', {
     center: new TMap.LatLng(DAYS[0].pois[0].lat, DAYS[0].pois[0].lng),
-    zoom: 6, pitch:0
+    zoom: 8, pitch:0
   });
   tInfo = new TMap.InfoWindow({ content:'', offset:{x:0,y:-50} });  // 不传 map 参数，避免加载时弹出空白框
   mapMode = 'tencent';
@@ -631,6 +631,8 @@ function startTencent(){
     if(/key|鉴权|LBS|无效|错误|error/i.test(txt)) startFallback();
   }, 1600);
   renderDay(currentDay);
+  // 地图初始化阶段 fitBounds 可能尚未生效，延迟再聚焦一次，确保默认视野聚焦到当日（市级别而非全省）
+  setTimeout(()=>{ if(mapMode==='tencent') fitPois(DAYS[currentDay].pois); }, 600);
 }
 
 function renderTencent(d){
@@ -743,8 +745,8 @@ function fitPois(pois){
   let minLat=90,maxLat=-90,minLng=180,maxLng=-180;
   pois.forEach(p=>{ minLat=Math.min(minLat,p.lat);maxLat=Math.max(maxLat,p.lat);minLng=Math.min(minLng,p.lng);maxLng=Math.max(maxLng,p.lng); });
   const sw=new TMap.LatLng(minLat,minLng), ne=new TMap.LatLng(maxLat,maxLng);
-  if(tmap.fitBounds){ tmap.fitBounds(new TMap.LatLngBounds(sw,ne), {padding:90}); }
-  else { tmap.panTo(new TMap.LatLng((minLat+maxLat)/2,(minLng+maxLng)/2)); tmap.setZoom(7); }
+  if(tmap.fitBounds){ tmap.fitBounds(new TMap.LatLngBounds(sw,ne), {padding:50}); }
+  else { tmap.panTo(new TMap.LatLng((minLat+maxLat)/2,(minLng+maxLng)/2)); tmap.setZoom(9); }
 }
 
 function tencentFocus(p){
